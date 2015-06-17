@@ -28,6 +28,11 @@ function log_value {
     echo "__BASH_METRIC;$1:$2:$3"
 }
 
+function ltrim {
+    read temp
+    echo "${temp##" "}"
+}
+
 
 function log_stats {
     # num_cores="$(grep 'core id' "$proc/cpuinfo" |sort -u |wc -l)"
@@ -83,7 +88,7 @@ function log_stats {
 
 
     ms="$(get_ms)"
-    sda_stats="$(grep sda "$proc/diskstats" |head -n1)"
+    sda_stats="$(grep sda "$proc/diskstats" |head -n1 | ltrim)"
     sda_reads="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f5)"
     sda_writes="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f9)"
     sda_io_queued="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f13)"
@@ -94,7 +99,7 @@ function log_stats {
 
 
     ms="$(get_ms)"
-    eth0_stats="$(grep eth0: "$proc/net/dev")"
+    eth0_stats="$(grep eth0: "$proc/net/dev" | ltrim)"
     eth0_received_bytes="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f2)"
     eth0_received_packets="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f3)"
     eth0_received_errors="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f4)"
