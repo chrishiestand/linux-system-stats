@@ -25,7 +25,7 @@ function log_value {
         ms="$3"
     fi
 
-    echo "__BASH_METRIC;$1:$2:$3"
+    echo "__BASH_METRIC_0;$1:$2:$3"  #__BASH_METRIC_x where x is the format version
 }
 
 function ltrim {
