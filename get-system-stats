@@ -33,7 +33,6 @@ function ltrim {
     echo "${temp##" "}"
 }
 
-
 function log_stats {
     # num_cores="$(grep 'core id' "$proc/cpuinfo" |sort -u |wc -l)"
     # num_virtual_cores=$(grep 'core id' "$proc/cpuinfo" |wc -l)
@@ -77,7 +76,6 @@ function log_stats {
     log_value memory_used_B $memory_used "$ms"
     log_value memory_available_B $memory_available "$ms"
 
-
     ms="$(get_ms)"
     root_disk_info="$(df /)"
     root_disk_used="$(echo "$root_disk_info" | tail -n1 |tr -s ' ' |cut -d' ' -f3)"
@@ -85,7 +83,6 @@ function log_stats {
 
     log_value root_disk_used_KiB $root_disk_used "$ms"
     log_value root_disk_free_KiB $root_disk_free "$ms"
-
 
     ms="$(get_ms)"
     sda_stats="$(grep sda "$proc/diskstats" |head -n1 | ltrim)"
@@ -96,7 +93,6 @@ function log_stats {
     log_value sda_reads_count $sda_reads "$ms"
     log_value sda_writes_count $sda_writes "$ms"
     log_value sda_io_queued_count $sda_io_queued "$ms"
-
 
     ms="$(get_ms)"
     eth0_stats="$(grep eth0: "$proc/1/net/dev" | ltrim)"
