@@ -30,8 +30,8 @@ function log_value {
 
 
 function log_stats {
-    # num_cores="$(grep 'core id' $proc/cpuinfo |sort -u |wc -l)"
-    # num_virtual_cores=$(grep 'core id' $proc/cpuinfo |wc -l)
+    # num_cores="$(grep 'core id' "$proc/cpuinfo" |sort -u |wc -l)"
+    # num_virtual_cores=$(grep 'core id' "$proc/cpuinfo" |wc -l)
 
     ms="$(get_ms)"
     cpu_agg_levels="$(top -d 1 -b -n 2 | grep -E '^%Cpu' |tail -n1)"
@@ -44,7 +44,7 @@ function log_stats {
     log_value cpu_aggregate_normalized_p "$cpu_agg_used" "$ms"
 
     ms="$(get_ms)"
-    cpu_stat="$(cat $proc/stat)"
+    cpu_stat="$(cat "$proc/stat")"
     cpu_idle_userhz="$(echo "$cpu_stat" | grep -E '^cpu '  | tr -s ' ' |cut -d' ' -f5)"
     cpu_iowait_userhz="$(echo "$cpu_stat" | grep -E '^cpu ' | tr -s ' ' |cut -d' ' -f6)"
     cpu_processthread_count="$(echo "$cpu_stat" | grep -E '^processes' |cut -d' ' -f2)"
@@ -83,7 +83,7 @@ function log_stats {
 
 
     ms="$(get_ms)"
-    sda_stats="$(grep sda $proc/diskstats |head -n1)"
+    sda_stats="$(grep sda "$proc/diskstats" |head -n1)"
     sda_reads="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f5)"
     sda_writes="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f9)"
     sda_io_queued="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f13)"
@@ -94,13 +94,13 @@ function log_stats {
 
 
     ms="$(get_ms)"
-    eth0_stats="$(grep eth0: $proc/net/dev)"
-    eth0_received_bytes="$(echo $eth0_stats | grep eth0: $proc/net/dev |tr -s ' ' |cut -d' ' -f3)"
-    eth0_received_packets="$(echo $eth0_stats | grep eth0: $proc/net/dev |tr -s ' ' |cut -d' ' -f4)"
-    eth0_received_errors="$(echo $eth0_stats | grep eth0: $proc/net/dev |tr -s ' ' |cut -d' ' -f5)"
-    eth0_transmitted_bytes="$(echo $eth0_stats | grep eth0: $proc/net/dev |tr -s ' ' |cut -d' ' -f11)"
-    eth0_transmitted_packets="$(echo $eth0_stats | grep eth0: $proc/net/dev |tr -s ' ' |cut -d' ' -f12)"
-    eth0_transmitted_errors="$(echo $eth0_stats | grep eth0: $proc/net/dev |tr -s ' ' |cut -d' ' -f13)"
+    eth0_stats="$(grep eth0: "$proc/net/dev")"
+    eth0_received_bytes="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f2)"
+    eth0_received_packets="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f3)"
+    eth0_received_errors="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f4)"
+    eth0_transmitted_bytes="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f10)"
+    eth0_transmitted_packets="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f11)"
+    eth0_transmitted_errors="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f12)"
 
     log_value eth0_received_aggregate_B $eth0_received_bytes "$ms"
     log_value eth0_received_packet_count $eth0_received_packets "$ms"
