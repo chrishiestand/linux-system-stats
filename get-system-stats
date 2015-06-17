@@ -99,7 +99,7 @@ function log_stats {
 
 
     ms="$(get_ms)"
-    eth0_stats="$(grep eth0: "$proc/net/dev" | ltrim)"
+    eth0_stats="$(grep eth0: "$proc/1/net/dev" | ltrim)"
     eth0_received_bytes="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f2)"
     eth0_received_packets="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f3)"
     eth0_received_errors="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f4)"
