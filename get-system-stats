@@ -77,6 +77,10 @@ function log_stats {
     log_value memory_available_B $memory_available "$ms"
 
     ms="$(get_ms)"
+    vmstat_pageouts="$(grep -E '^pgpgout' "$proc/vmstat" |cut -d' ' -f2)"
+    log_value vmstat_pageouts_count $vmstat_pageouts "$ms"
+
+    ms="$(get_ms)"
     root_disk_info="$(df /)"
     root_disk_used="$(echo "$root_disk_info" | tail -n1 |tr -s ' ' |cut -d' ' -f3)"
     root_disk_free="$(echo "$root_disk_info" | tail -n1 |tr -s ' ' |cut -d' ' -f4)"
