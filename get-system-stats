@@ -12,7 +12,7 @@ proc="${1-"/proc"}"
 cycle_s="${2-"-1"}"
 
 function get_ms {
-    echo "$(date +%s%3N)"
+    date +%s%3N
 }
 
 function log_value {
@@ -25,7 +25,7 @@ function log_value {
         ms="$3"
     fi
 
-    echo "__BASH_METRIC_0;$1:$2:$3"  #__BASH_METRIC_x where x is the format version
+    echo "__BASH_METRIC_0;$name:$value:$ms"  #__BASH_METRIC_x where x is the format version
 }
 
 function ltrim {
@@ -40,9 +40,9 @@ function log_stats {
     ms="$(get_ms)"
     cpu_agg_levels="$(top -d 1 -b -n 2 | grep -E '^%Cpu' |tail -n1)"
 
-    cpu_agg_idle_string="$([[ $cpu_agg_levels =~ ([0-9]+\.[0-9] id) ]] && echo $BASH_REMATCH)"
-    cpu_agg_idle_float="$(echo $cpu_agg_idle_string | cut -d' ' -f1)"
-    cpu_agg_idle_int="$(printf "%.0f" $cpu_agg_idle_float)"
+    cpu_agg_idle_string="$([[ $cpu_agg_levels =~ ([0-9]+\.[0-9] id) ]] && echo "$BASH_REMATCH")"
+    cpu_agg_idle_float="$(echo "$cpu_agg_idle_string" | cut -d' ' -f1)"
+    cpu_agg_idle_int="$(printf "%.0f" "$cpu_agg_idle_float")"
     cpu_agg_used="$((100 - cpu_agg_idle_int))"
 
     log_value cpu_aggregate_normalized_p "$cpu_agg_used" "$ms"
@@ -53,40 +53,40 @@ function log_stats {
     cpu_iowait_userhz="$(echo "$cpu_stat" | grep -E '^cpu ' | tr -s ' ' |cut -d' ' -f6)"
     cpu_processthread_count="$(echo "$cpu_stat" | grep -E '^processes' |cut -d' ' -f2)"
 
-    log_value cpu_idle_userhz $cpu_idle_userhz "$ms"
-    log_value cpu_iowait_userhz $cpu_iowait_userhz "$ms"
-    log_value cpu_processthread_count $cpu_processthread_count "$ms"
+    log_value cpu_idle_userhz "$cpu_idle_userhz" "$ms"
+    log_value cpu_iowait_userhz "$cpu_iowait_userhz" "$ms"
+    log_value cpu_processthread_count "$cpu_processthread_count" "$ms"
 
     ms="$(get_ms)"
     w_head="$(w |head -n1)"
-    load_averages="$(echo "${w_head##*load average: }")"
+    load_averages="${w_head##*load average: }"
     load_average_1="$(echo "$load_averages" |cut -d, -f1)"
     load_average_5="$(echo "$load_averages" |cut -d' ' -f2 |cut -d, -f1)"
     load_average_15="$(echo "$load_averages" |cut -d' ' -f3)"
 
-    log_value load_average_1 $load_average_1 "$ms"
-    log_value load_average_5 $load_average_5 "$ms"
-    log_value load_average_15 $load_average_15 "$ms"
+    log_value load_average_1 "$load_average_1" "$ms"
+    log_value load_average_5 "$load_average_5" "$ms"
+    log_value load_average_15 "$load_average_15" "$ms"
 
     ms="$(get_ms)"
     memory_stats="$(free -b)"
     memory_used="$(echo "$memory_stats" | grep '^-/+' | tr -s ' ' | cut -d' ' -f3)"
     memory_available="$(echo "$memory_stats" | grep '^-/+' | tr -s ' ' | cut -d' ' -f4)"
 
-    log_value memory_used_B $memory_used "$ms"
-    log_value memory_available_B $memory_available "$ms"
+    log_value memory_used_B "$memory_used" "$ms"
+    log_value memory_available_B "$memory_available" "$ms"
 
     ms="$(get_ms)"
     vmstat_pageouts="$(grep -E '^pgpgout' "$proc/vmstat" |cut -d' ' -f2)"
-    log_value vmstat_pageouts_count $vmstat_pageouts "$ms"
+    log_value vmstat_pageouts_count "$vmstat_pageouts" "$ms"
 
     ms="$(get_ms)"
     root_disk_info="$(df /)"
     root_disk_used="$(echo "$root_disk_info" | tail -n1 |tr -s ' ' |cut -d' ' -f3)"
     root_disk_free="$(echo "$root_disk_info" | tail -n1 |tr -s ' ' |cut -d' ' -f4)"
 
-    log_value root_disk_used_KiB $root_disk_used "$ms"
-    log_value root_disk_free_KiB $root_disk_free "$ms"
+    log_value root_disk_used_KiB "$root_disk_used" "$ms"
+    log_value root_disk_free_KiB "$root_disk_free" "$ms"
 
     ms="$(get_ms)"
     sda_stats="$(grep sda "$proc/diskstats" |head -n1 | ltrim)"
@@ -94,9 +94,9 @@ function log_stats {
     sda_writes="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f9)"
     sda_io_queued="$(echo "$sda_stats" | tr -s ' ' |cut -d' ' -f13)"
 
-    log_value sda_reads_count $sda_reads "$ms"
-    log_value sda_writes_count $sda_writes "$ms"
-    log_value sda_io_queued_count $sda_io_queued "$ms"
+    log_value sda_reads_count "$sda_reads" "$ms"
+    log_value sda_writes_count "$sda_writes" "$ms"
+    log_value sda_io_queued_count "$sda_io_queued" "$ms"
 
     ms="$(get_ms)"
     eth0_stats="$(grep eth0: "$proc/1/net/dev" | ltrim)"
@@ -107,18 +107,18 @@ function log_stats {
     eth0_transmitted_packets="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f11)"
     eth0_transmitted_errors="$(echo "$eth0_stats" |tr -s ' ' |cut -d' ' -f12)"
 
-    log_value eth0_received_aggregate_B $eth0_received_bytes "$ms"
-    log_value eth0_received_packet_count $eth0_received_packets "$ms"
-    log_value eth0_received_error_count $eth0_received_errors "$ms"
-    log_value eth0_transmitted_aggregate_B $eth0_transmitted_bytes "$ms"
-    log_value eth0_transmitted_packet_count $eth0_transmitted_packets "$ms"
-    log_value eth0_transmitted_error_count $eth0_transmitted_errors "$ms"
+    log_value eth0_received_aggregate_B "$eth0_received_bytes" "$ms"
+    log_value eth0_received_packet_count "$eth0_received_packets" "$ms"
+    log_value eth0_received_error_count "$eth0_received_errors" "$ms"
+    log_value eth0_transmitted_aggregate_B "$eth0_transmitted_bytes" "$ms"
+    log_value eth0_transmitted_packet_count "$eth0_transmitted_packets" "$ms"
+    log_value eth0_transmitted_error_count "$eth0_transmitted_errors" "$ms"
 }
 
 log_stats
 
 if [ "$cycle_s" -gt "-1" ]; then
-    while [ 0 ]; do
+    while true; do
         sleep "$cycle_s"
         log_stats
     done
