@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-#system requirements: linux2.6+, bash 4+, top, date
+#system requirements: linux 3.14+, bash 4+, top, date
 
 if [ "$(uname)" != "Linux" ]; then
     echo "$0 only supported in linux"
@@ -25,7 +25,7 @@ function log_value {
         ms="$3"
     fi
 
-    echo "__BASH_METRIC_0;$name:$value:$ms"  #__BASH_METRIC_x where x is the format version
+    echo "__BASH_METRIC_1;$name:$value:$ms"  #__BASH_METRIC_x where x is the format version
 }
 
 function ltrim {
@@ -69,12 +69,13 @@ function log_stats {
     log_value load_average_15 "$load_average_15" "$ms"
 
     ms="$(get_ms)"
-    memory_stats="$(free -b)"
-    memory_used="$(echo "$memory_stats" | grep '^-/+' | tr -s ' ' | cut -d' ' -f3)"
-    memory_available="$(echo "$memory_stats" | grep '^-/+' | tr -s ' ' | cut -d' ' -f4)"
+    memory_stats="$(cat /proc/meminfo)"
+    memory_available="$(echo "$memory_stats" | grep MemAvail |tr -s ' ' | cut -d' ' -f2)"
+    memory_total="$(echo "$memory_stats" | grep MemTotal |tr -s ' ' | cut -d' ' -f2)"
+    memory_used="$(($memory_total - $memory_available))"
 
-    log_value memory_used_B "$memory_used" "$ms"
-    log_value memory_available_B "$memory_available" "$ms"
+    log_value memory_used_KiB "$memory_used" "$ms"
+    log_value memory_available_KiB "$memory_available" "$ms"
 
     ms="$(get_ms)"
     vmstat_pageouts="$(grep -E '^pgpgout' "$proc/vmstat" |cut -d' ' -f2)"
